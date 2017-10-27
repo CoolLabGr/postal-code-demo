@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+  <!-- CSS Reset -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+
+  <!-- Milligram CSS minified -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+
+  <style>
+    body {background-color: #3d2342; color: #f5f5f5;}
+    header {
+      background: #F44336;
+    }
+    .toolbar {
+      display: flex;
+      height: 64px;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    .form.container {
+      width: 500px;
+      max-width: 80%;
+      margin-top: 32px;
+    }
+    input#postalInput:invalid {
+      border-color: red;
+    }
+    input#postalInput:valid {
+      border-color: green;
+    }
+
+    footer {
+      background-color: #d32f2f;
+      margin-top: 54px;
+    }
+    footer p {
+      margin: 0;
+      padding: 32px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="toolbar"></div>
+    <div class="toolbar"></div>
+    <div class="toolbar"></div>
+  </header>
+
+  <div class="form container">
+    <form>
+      <fieldset>
+        <label for="firstNameField">Όνομα</label>
+        <input type="text" name="firstName" id="firstNameField" required>
+  
+        <label for="lastNameField">Επώνυμο</label>
+        <input type="text" name="lastName" id="lastNameField" required>
+  
+        <label for="addressField">Οδός</label>
+        <input type="text" name="address" id="addressField" required>
+  
+        <label for="addressNumberField">Αριθμός</label>
+        <input type="text" name="addressNumber" id="addressNumberField">
+        
+        
+        <label for="postalInput">Ταχ. Κωδικός</label>
+        <input id="postalInput" type="text" name="postal" title="5 digit postal code" pattern="[0-9]{5}" required>
+  
+        <label for="cityInput">Πόλη</label>
+        <select name="city" id="cityInput">
+          <option value="city">Πόλη</option>
+        </select>
+  
+        <label for="minicInput">Νομός</label>
+        <input id="minicInput" name="minicipality" type="text">
+  
+        <label for="phoneField">Σταθ. Τηλέφωνο</label>
+        <input id="phoneField" name="phone" type="text">
+  
+        <label for="selphoneField">Κιν. Τηλέφωνο</label>
+        <input id="selphoneField" name="selphone" type="text" required>
+  
+        <div class="float-right">
+          <input type="checkbox" id="confirmField">
+          <label class="label-inline" for="confirmField">Send a copy to yourself</label>
+        </div>
+        <input class="button-primary" type="submit" value="Ολοκλήρωση Παραγγελίας">
+      </fieldset>
+    </form>
+  </div>
+
+  <footer class="container">
+    <p>
+      Tip: αυτή την στιγμή δεχόμαστε παραγγελίες <strong>ΜΟΝΟ</strong> απο την κεντρική Αθήνα.
+    </p>
+  </footer>
+
+
+
+
+  <script>
+    const postalInput = document.getElementById('postalInput');
+    const cityInput = document.getElementById('cityInput');
+    const minicInput = document.getElementById('minicInput');
+    var json;
+    postalInput.addEventListener('input', function() {
+      if(this.value.length < 5) {
+        minicInput.disabled = false
+        minicInput.value = ''
+
+        cityInput.innerHTML = ''
+        let optionTag = document.createElement('option');
+        optionTag.value = 'city';
+        optionTag.innerText = 'Πόλη';
+        cityInput.appendChild(optionTag)
+        return;
+      }
+      console.log('postal input is a number and has corect length')
+
+      var results = json.filter( obj => obj.code == this.value );
+
+      if(results.length === 0) { alert('Ο Ταχ. Κωδικός ΔΕΝ είναι σωστός.'); return;}
+
+      // CLEAR THE SELECt OPTIONS
+      cityInput.innerHTML = ''
+      
+      results[0].info.forEach(function(element) {
+        //CREATE A NEW OPTION
+        let optionTag = document.createElement('option');
+        optionTag.value = element.DisplayName;
+        optionTag.innerText = element.DisplayName;
+        cityInput.appendChild(optionTag)
+
+        minicInput.value = element.Prefecture
+        minicInput.disabled = true
+      }, this);
+
+    })
+    function reqListener(res) {
+      let jsonFile = this.responseText
+      json = JSON.parse(jsonFile)
+    }
+  
+    let reqObj = new XMLHttpRequest();
+    reqObj.addEventListener("load", reqListener);
+    reqObj.open('GET', '/greek-postal-codes.json')
+    reqObj.send()
+  
+  </script>
+</body>
+</html>
